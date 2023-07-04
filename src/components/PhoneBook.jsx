@@ -1,8 +1,13 @@
-import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { addContact, fetchContacts } from 'redux/operators';
+import { useEffect, useRef } from "react";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { addContact, fetchContacts } from "redux/rootOperators";
+import {
+  contactsSelector,
+  errorSelector,
+  isLoadingSelector,
+} from "redux/rootSelectors";
 
-import { Contacts } from './Contacts';
+import { Contacts } from "./Contacts";
 
 export const PhoneBook = () => {
   const dispatch = useDispatch();
@@ -13,9 +18,9 @@ export const PhoneBook = () => {
 
   let formRef = useRef();
 
-  const contacts = useSelector(state => state.contacts.items, shallowEqual);
-  const isLoading = useSelector(state => state.contacts.isLoading);
-  const error = useSelector(state => state.contacts.error);
+  const contacts = useSelector(contactsSelector, shallowEqual);
+  const isLoading = useSelector(isLoadingSelector);
+  const error = useSelector(errorSelector);
   const previousCountRef = useRef(contacts);
   const isStateChanged = previousCountRef.current !== contacts;
 
@@ -42,13 +47,13 @@ export const PhoneBook = () => {
         ref={formRef}
         onSubmit={handleSubmit}
         style={{
-          border: '1px #000 solid',
-          width: '200px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          maxWidth: '280px',
-          padding: '48px 24px',
+          border: "1px #000 solid",
+          width: "200px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          maxWidth: "280px",
+          padding: "48px 24px",
         }}
       >
         <span>Name</span>
@@ -70,7 +75,7 @@ export const PhoneBook = () => {
 
         <button action="submit">Add contact</button>
       </form>
-      {error && <p style={{ color: 'red', maxWidth: '300px' }}> {error}</p>}
+      {error && <p style={{ color: "red", maxWidth: "300px" }}> {error}</p>}
       {isLoading ? <span>Loading...</span> : <Contacts />}
     </div>
   );

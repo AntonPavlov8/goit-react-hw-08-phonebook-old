@@ -1,5 +1,5 @@
-import { fetchContacts, addContact, deleteContact } from './operators';
-const { createSlice } = require('@reduxjs/toolkit');
+import { fetchContacts, addContact, deleteContact } from "./rootOperators";
+const { createSlice } = require("@reduxjs/toolkit");
 
 const initialState = {
   contacts: {
@@ -7,20 +7,20 @@ const initialState = {
     isLoading: false,
     error: null,
   },
-  filter: '',
+  filter: "",
 };
 const rootReducer = createSlice({
-  name: 'root',
+  name: "root",
   initialState,
   reducers: {
     changeFilter: (state, action) => {
       state.filter = action.payload;
     },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder
       //fetch all contacts
-      .addCase(fetchContacts.pending, state => {
+      .addCase(fetchContacts.pending, (state) => {
         state.contacts.isLoading = true;
       })
       .addCase(fetchContacts.fulfilled, (state, action) => {
@@ -33,7 +33,7 @@ const rootReducer = createSlice({
         state.contacts.isLoading = false;
       })
       //add new contact
-      .addCase(addContact.pending, state => {
+      .addCase(addContact.pending, (state) => {
         state.contacts.isLoading = true;
       })
       .addCase(addContact.fulfilled, (state, action) => {
@@ -46,10 +46,10 @@ const rootReducer = createSlice({
         state.contacts.isLoading = false;
       })
       //delete contact
-      .addCase(deleteContact.pending, state => {
+      .addCase(deleteContact.pending, (state) => {
         state.contacts.isLoading = true;
       })
-      .addCase(deleteContact.fulfilled, state => {
+      .addCase(deleteContact.fulfilled, (state) => {
         state.contacts.isLoading = false;
         state.contacts.error = null;
       })

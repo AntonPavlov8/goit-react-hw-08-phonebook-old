@@ -1,5 +1,5 @@
-import { useDispatch } from 'react-redux';
-import { deleteContact, fetchContacts } from 'redux/operators';
+import { useDispatch } from "react-redux";
+import { deleteContact, fetchContacts } from "redux/rootOperators";
 
 export const ContactsItem = ({ contact }) => {
   const dispatch = useDispatch();
@@ -7,7 +7,7 @@ export const ContactsItem = ({ contact }) => {
   return (
     <li>
       {contact.name}
-      {': '}
+      {": "}
       {contact.phone}
 
       <button
