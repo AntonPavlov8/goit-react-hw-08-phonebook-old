@@ -1,64 +1,55 @@
-import Login from "pages/Login";
-import SignUp from "pages/Signup";
-import { Route, Routes } from "react-router-dom";
-import { PhoneBook } from "./PhoneBook";
-import PrivateRoute from "./PrivateRoute";
-import PublicRoute from "./PublicRoute";
 import { UserMenu } from "./UserMenu";
-
-import { Layout, Menu, theme } from "antd";
-
+import { Layout, theme } from "antd";
+import { Navigation } from "./Navigation";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "redux/authOperators";
+import { isLoadingSelector } from "redux/rootSelectors";
+import { LoadingOutlined } from "@ant-design/icons";
+import { loadingFalse } from "redux/reducer";
 export const App = () => {
-  const { Header, Content, Footer, Sider } = Layout;
+  const dispatch = useDispatch();
+  const isLoading = useSelector(isLoadingSelector);
+  const { Content } = Layout;
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  useEffect(() => {
+    const data = localStorage.getItem("data");
+    if (data?.length > 0) {
+      dispatch(getUser(data)).then(() => {
+        dispatch(loadingFalse());
+      });
+    } else dispatch(loadingFalse());
+  }, [dispatch]);
   return (
     <Layout style={{ height: "100vh" }}>
       <Layout>
         <UserMenu />
-
-        {/* <Header style={{ padding: 0, background: colorBgContainer }} /> */}
-        <Content style={{ margin: "24px 16px 24px" }}>
-          <div
+        {isLoading ? (
+          <span
             style={{
-              background: colorBgContainer,
-              height: "100%",
+              alignItems: "center",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
             }}
           >
-            <Routes>
-              <Route
-                path="register"
-                element={
-                  <PublicRoute>
-                    <SignUp />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="contacts"
-                element={
-                  <PrivateRoute>
-                    <PhoneBook />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="/" element={<div>lllx</div>} />
-            </Routes>
-          </div>
-        </Content>
-        {/* <Footer style={{ textAlign: "center" }}>
-          Ant Design ©2023 Created by Ant UED
-        </Footer> */}
+            <LoadingOutlined style={{ zoom: "3" }} />
+          </span>
+        ) : (
+          <Content style={{ margin: "24px 16px 24px" }}>
+            <div
+              style={{
+                background: colorBgContainer,
+                height: "100%",
+              }}
+            >
+              <Navigation />
+            </div>
+          </Content>
+        )}
       </Layout>
     </Layout>
   );

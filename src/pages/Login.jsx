@@ -1,15 +1,33 @@
-import { Button, Form, Input, Space } from "antd";
+import { Button, Form, Input, message, Space } from "antd";
+import { useEffect } from "react";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logIn } from "redux/authOperators";
+import { errorSelector, loadingSelector } from "redux/authSelectors";
 
 export default function Login() {
+  const error = useSelector(errorSelector);
+  const isLoading = useSelector(loadingSelector);
   const dispatch = useDispatch();
   const [data, setData] = useState({
     email: null,
     password: null,
   });
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  useEffect(() => {
+    const showError = () => {
+      messageApi.open({
+        type: "error",
+        content: "User cannot be found",
+      });
+    };
+    if (error) {
+      showError();
+    }
+  }, [error, messageApi]);
 
   const handleChange = (e) =>
     setData({ ...data, [e.target.name]: e.target.value });
@@ -32,6 +50,7 @@ export default function Login() {
         alignItems: "center",
       }}
     >
+      {contextHolder}
       <h1>Log in</h1>
       <Form onFinish={() => dispatch(logIn(data))}>
         <Form.Item
@@ -63,7 +82,7 @@ export default function Login() {
           <Input.Password name="password" />
         </Form.Item>
         <Space>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={isLoading}>
             Log in
           </Button>
           <Link to={"/register"}>

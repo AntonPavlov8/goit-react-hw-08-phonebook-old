@@ -1,80 +1,93 @@
+import { Button, Form, Input } from "antd";
+import AntdPhoneInput from "antd-phone-input";
 import { useEffect, useRef } from "react";
-import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addContact, fetchContacts } from "redux/rootOperators";
 import {
   contactsSelector,
   errorSelector,
   isLoadingSelector,
 } from "redux/rootSelectors";
-
 import { Contacts } from "./Contacts";
 
 export const PhoneBook = () => {
   const dispatch = useDispatch();
 
+  let formRef = useRef();
+
+  const contacts = useSelector(contactsSelector);
+  const isLoading = useSelector(isLoadingSelector);
+  const error = useSelector(errorSelector);
+
+  function handleSubmit(e) {
+    const { phone, name } = e;
+    let number = "";
+
+    if (phone.phoneNumber) {
+      number = `+${phone.countryCode} (${
+        phone.areaCode
+      }) ${phone?.phoneNumber?.slice(0, 3)} ${phone?.phoneNumber?.slice(3)}`;
+    } else {
+      function checkAreaCode(data) {
+        if (data.areaCode) {
+          return `(${data.areaCode})`;
+        }
+        return "";
+      }
+      number = `+${phone.countryCode} ` + checkAreaCode(phone);
+    }
+    dispatch(addContact({ contacts, name, number })).then((data) => {
+      if (!data?.error) {
+        formRef.current.resetFields();
+      }
+    });
+  }
+
   useEffect(() => {
     dispatch(fetchContacts());
   }, [dispatch]);
 
-  let formRef = useRef();
-
-  const contacts = useSelector(contactsSelector, shallowEqual);
-  const isLoading = useSelector(isLoadingSelector);
-  const error = useSelector(errorSelector);
-  const previousCountRef = useRef(contacts);
-  const isStateChanged = previousCountRef.current !== contacts;
-
-  useEffect(() => {
-    if (isStateChanged) {
-      formRef.current.reset();
+  const validator = (_, value) => {
+    if (value && !value.valid) {
+      return Promise.reject(new Error("Please enter valid phone number"));
     }
-  }, [contacts, isStateChanged]);
-
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-    const name = form.elements.name.value;
-    const phone = form.elements.phone.value;
-
-    dispatch(addContact({ contacts, name, phone }));
-  }
+    return Promise.resolve();
+  };
 
   return (
-    <div>
-      <h2>Phonebook</h2>
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        style={{
-          border: "1px #000 solid",
-          width: "200px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          maxWidth: "280px",
-          padding: "48px 24px",
-        }}
-      >
-        <span>Name</span>
-        <input
-          type="text"
+    <div style={{ padding: "24px" }}>
+      <h2>Contacts</h2>
+      <Form ref={formRef} onFinish={handleSubmit} style={{ maxWidth: "350px" }}>
+        <Form.Item
           name="name"
-          pattern="^[a-zA-Zа-яА-Я]+(['-][a-zA-Zа-яА-Я ]*)*$"
-          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan."
-          required
-        />
-        <span>Number</span>
-        <input
-          type="tel"
+          label="Name"
+          rules={[
+            {
+              required: true,
+              message: "Please input contact name!",
+            },
+          ]}
+        >
+          <Input
+            name="name"
+            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan."
+          />
+        </Form.Item>
+        <Form.Item
           name="phone"
-          pattern="^(?:\+?\d{1,3})?\d+$"
-          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          required
-        />
-
-        <button action="submit">Add contact</button>
-      </form>
+          label="Phone"
+          rules={[
+            {
+              required: true,
+              message: "Please input contact number!",
+            },
+            { validator: validator },
+          ]}
+        >
+          <AntdPhoneInput enableSearch />
+        </Form.Item>
+        <Button htmlType="submit">Add contact</Button>
+      </Form>
       {error && <p style={{ color: "red", maxWidth: "300px" }}> {error}</p>}
       {isLoading ? <span>Loading...</span> : <Contacts />}
     </div>

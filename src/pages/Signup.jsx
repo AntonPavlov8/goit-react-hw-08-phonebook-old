@@ -1,7 +1,7 @@
 import { Button, Form, Input, Space } from "antd";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { signUp } from "redux/authOperators";
 import validator from "validator";
 
